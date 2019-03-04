@@ -13,7 +13,7 @@ def ema(samples, current_day, day_count):
         power = pow(one_minus_alpha, i)
         b += power
         if current_day - i > 0:
-            a += power * samples[current_day - 1 - i]
+            a += power * samples[current_day - i]
         else:
             a += power * samples[0]
             return a / b
@@ -22,7 +22,7 @@ def ema(samples, current_day, day_count):
 
 def buy(prices, index, budget, stock):
     if budget >= prices[index]:
-        quantity = int(budget / prices[index])
+        quantity = budget // prices[index]
         full_price = quantity * prices[index]
         return budget - full_price, stock + quantity
     else:
@@ -45,16 +45,16 @@ if __name__ == '__main__':
     my_stock = 0
     macd, signal = [], []
 
-    df = pd.read_csv('apple.csv')
-    prices = df['close'].tolist()
+    df = pd.read_csv('netflix.csv')
+    prices = df['Close'].tolist()
 
     for i in range(0, N):
         macd.append(ema(prices, i, 12) - ema(prices, i, 26))
     for i in range(0, N):
         signal.append(ema(macd, i, 9))
 
-    dates = np.array(df['date'].tolist())
-    x = [dt.datetime.strptime(d, '%Y/%m/%d').date() for d in dates]
+    dates = np.array(df['Date'].tolist())
+    x = [dt.datetime.strptime(d, '%Y-%m-%d').date() for d in dates]
 
     x = np.array(x)
     macd = np.array(macd)
@@ -64,9 +64,9 @@ if __name__ == '__main__':
 
     # Stock prices plot
     f = plt.figure('STOCK')
-    plt.title('Apple Inc.\nStock prices')
+    plt.title('Netflix Inc.\nStock prices')
     plt.xlabel('Date')
-    plt.ylabel('Price')
+    plt.ylabel('Price [USD]')
 
     plt.plot(x, prices, label='Price')
     plt.legend(loc='upper right')
@@ -74,9 +74,9 @@ if __name__ == '__main__':
 
     # MACD and SIGNAL plots
     g = plt.figure('MACD')
-    plt.title('Apple Inc.\nMACD & SIGNAL')
+    plt.title('Netflix Inc.\nMACD & SIGNAL')
     plt.xlabel('Date')
-    plt.ylabel('Price')
+    plt.ylabel('Price [USD]')
 
     idx = np.argwhere(np.diff(np.sign(macd - signal))).flatten()
     intersection_points = np.array(idx)
@@ -96,7 +96,7 @@ if __name__ == '__main__':
             plt.plot(x[intersection_points[i]], signal[intersection_points[i]], 'bo')
             my_budget, my_stock = sell(prices, intersection_points[i], my_budget, my_stock)
 
-    # my_budget, my_stock = sell(prices, intersection_points[i], my_budget, my_stock)
+    my_budget, my_stock = sell(prices, intersection_points[i], my_budget, my_stock)
     print("After")
     print 'Budget: ', my_budget
     print 'Stock: ', my_stock
