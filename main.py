@@ -45,7 +45,7 @@ if __name__ == '__main__':
     my_stock = 0
     macd, signal = [], []
 
-    df = pd.read_csv('apple.csv')
+    df = pd.read_csv('netflix.csv')
     prices = df['Close'].tolist()
 
     for i in range(0, N):
@@ -64,7 +64,7 @@ if __name__ == '__main__':
 
     # Stock prices plot
     f = plt.figure('STOCK')
-    plt.title('Apple Inc.\nStock prices')
+    plt.title('Netflix Inc.\nStock prices')
     plt.xlabel('Date')
     plt.ylabel('Price [USD]')
 
@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
     # MACD and SIGNAL plots
     g = plt.figure('MACD')
-    plt.title('Apple Inc.\nMACD & SIGNAL')
+    plt.title('Netflix Inc.\nMACD & SIGNAL')
     plt.xlabel('Date')
     plt.ylabel('Price [USD]')
 
@@ -85,8 +85,8 @@ if __name__ == '__main__':
     plt.plot(x, signal, label='SIGNAL')
 
     print("Before")
-    print 'Budget: ', my_budget
-    print 'Stock: ', my_stock, '\n'
+    print('Budget: ', my_budget)
+    print('Stock: ', my_stock, '\n')
 
     for i in range(0, size):
         if macd[intersection_points[i] - 1] > signal[intersection_points[i] - 1]:
@@ -100,8 +100,8 @@ if __name__ == '__main__':
 
     my_budget, my_stock = sell(prices, intersection_points[i], my_budget, my_stock)
     print("After")
-    print 'Budget: ', my_budget
-    print 'Stock: ', my_stock
+    print('Budget: ', my_budget)
+    print('Stock: ', my_stock)
     plt.legend(loc='upper right')
     plt.gcf().autofmt_xdate()
 
