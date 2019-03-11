@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import matplotlib.lines as ln
 import numpy as np
 import datetime as dt
 from pandas.plotting import register_matplotlib_converters
@@ -39,9 +40,9 @@ def sell(prices, index, budget, stock):
 
 if __name__ == '__main__':
     register_matplotlib_converters()
-
+    BUDGET = 1000
     N = 1000
-    my_budget = 1000
+    my_budget = BUDGET
     my_stock = 0
     macd, signal = [], []
 
@@ -60,49 +61,57 @@ if __name__ == '__main__':
     macd = np.array(macd)
     signal = np.array(signal)
 
-    plt.rcParams['figure.figsize'] = [16, 5]
+    plt.rcParams['figure.figsize'] = [16, 9]
 
     # Stock prices plot
-    f = plt.figure('STOCK')
-    plt.title('Netflix Inc.\nStock prices')
+    plt.figure('Netflix Inc.')
+    stock_plot = plt.subplot(2, 1, 1)
+    plt.axis([x[0], x[N - 1], 0, 450])
+    # plt.axis([x[N - 1 - 400], x[N - 1], 150, 450])    # 300 ostatnich dni
+    plt.title('Stock prices')
     plt.xlabel('Date')
     plt.ylabel('Price [USD]')
-
+    plt.grid(which='major', axis='both', alpha=0.3)
     plt.plot(x, prices, label='Price')
-    plt.legend(loc='upper right')
-    plt.gcf().autofmt_xdate()
+    plt.legend(loc='upper left')
 
     # MACD and SIGNAL plots
-    g = plt.figure('MACD')
-    plt.title('Netflix Inc.\nMACD & SIGNAL')
+    plt.subplot(2, 1, 2)
+    plt.axis([x[0], x[N - 1], -40, 40])
+    # plt.axis([x[N - 1 - 400], x[N - 1], -30, 40])     # 300 ostatnich dni
+    plt.title('MACD & SIGNAL')
     plt.xlabel('Date')
     plt.ylabel('Price [USD]')
+    plt.grid(which='major', axis='both', alpha=0.3)
 
     idx = np.argwhere(np.diff(np.sign(macd - signal))).flatten()
     intersection_points = np.array(idx)
     size = len(intersection_points)
     plt.plot(x, macd, label='MACD')
     plt.plot(x, signal, label='SIGNAL')
+    plt.legend(loc='upper left')
 
-    print("Before")
-    print('Budget: ', my_budget)
-    print('Stock: ', my_stock, '\n')
-
+    # Intersection plot
     for i in range(0, size):
-        if macd[intersection_points[i] - 1] > signal[intersection_points[i] - 1]:
-            plt.plot(x[intersection_points[i]], signal[intersection_points[i]], 'ro')
-            if macd[intersection_points[i]] > 0:
-                my_budget, my_stock = buy(prices, intersection_points[i], my_budget, my_stock)
-        else:
+        if macd[intersection_points[i]] > signal[intersection_points[i]]:
             plt.plot(x[intersection_points[i]], signal[intersection_points[i]], 'bo')
-            if macd[intersection_points[i]] < 0:
+            if macd[intersection_points[i]] > 0:
                 my_budget, my_stock = sell(prices, intersection_points[i], my_budget, my_stock)
+                plt.axvline(x[intersection_points[i]], ymin=0.5, ymax=1, color="green", alpha=0.4)
+        else:
+            plt.plot(x[intersection_points[i]], signal[intersection_points[i]], 'ro')
+            if macd[intersection_points[i]] < 0:
+                my_budget, my_stock = buy(prices, intersection_points[i], my_budget, my_stock)
+                plt.axvline(x[intersection_points[i]], ymin=0, ymax=0.5, color="red", alpha=0.4)
 
-    my_budget, my_stock = sell(prices, intersection_points[i], my_budget, my_stock)
-    print("After")
-    print('Budget: ', my_budget)
-    print('Stock: ', my_stock)
-    plt.legend(loc='upper right')
-    plt.gcf().autofmt_xdate()
+    stock_worth = my_stock * prices[N - 1]
+    profit = (my_budget + stock_worth) - BUDGET
+    print('Starting budget: {}$'.format(BUDGET))
+    print('Budget now: {0:.2f}$'.format(my_budget))
+    print('Stock now: ', my_stock)
+    print('Stock worth: {0:.2f}$'.format(round(stock_worth, 2)))
+    print('Earned: {0:.2f}$'.format(round(profit, 2)))
+    print('Profit: {0:.2f}%'.format(round((profit / BUDGET) * 100, 2)))
 
+    plt.tight_layout()
     plt.show()
