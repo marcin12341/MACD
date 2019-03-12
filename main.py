@@ -95,12 +95,12 @@ if __name__ == '__main__':
     for i in range(0, size):
         if macd[intersection_points[i]] > signal[intersection_points[i]]:
             plt.plot(x[intersection_points[i]], signal[intersection_points[i]], 'bo')
-            if macd[intersection_points[i]] > 0:
+            if macd[intersection_points[i]] > 0 and x[intersection_points[i]] > x[25]:
                 my_budget, my_stock = sell(prices, intersection_points[i], my_budget, my_stock)
                 plt.axvline(x[intersection_points[i]], ymin=0.5, ymax=1, color="green", alpha=0.4)
         else:
             plt.plot(x[intersection_points[i]], signal[intersection_points[i]], 'ro')
-            if macd[intersection_points[i]] < 0:
+            if macd[intersection_points[i]] < 0 and x[intersection_points[i]] > x[25]:
                 my_budget, my_stock = buy(prices, intersection_points[i], my_budget, my_stock)
                 plt.axvline(x[intersection_points[i]], ymin=0, ymax=0.5, color="red", alpha=0.4)
 
